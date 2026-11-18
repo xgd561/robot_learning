@@ -1,7 +1,7 @@
 # UGOT 机器人 · 13 岁孩子的 Python 学习路线图
 
 > 本文档基于优必选（UBTECH）官方 `ugot` Python SDK（PyPI 版本 0.2.13，MIT 协议，要求 Python ≥ 3.7）整理。
-> 所有示例代码都来自官方 SDK 源码核对，可直接运行。配套可运行示例见同目录 `examples/` 文件夹。
+> 所有示例代码都来自官方 SDK 源码核对，可直接运行。逐条核对过的方法签名、参数范围和勘误记录见同目录 **`API事实表_ugot0.2.13.md`**（唯一校对基准）；每周的可运行脚手架代码在各周《实践手册》里。
 
 ---
 
@@ -58,27 +58,27 @@ ug.initialize("192.168.x.x")   # ← 换成机器人屏幕上“设置→关于�
 ### 第 0 级 · 变量、打印、循环（在屏幕上看到字）
 **对应 Python 知识点**：`print`、字符串、变量、`for` 循环。
 目标：让机器人屏幕一行行显示文字、倒计时。
-示例文件：`examples/01_屏幕与循环.py`
+动手材料：第 2 周《实践手册》（屏幕倒计时 + 语音报数）
 
 ### 第 1 级 · 函数、让机器人动起来
 **对应 Python 知识点**：定义函数 `def`、参数、调用。
 目标：写一个 `前进(秒)` 函数，拼出“前进→转弯→后退”的小路线。
-示例文件：`examples/02_让机器人动起来.py`
+动手材料：第 3 周《实践手册》（函数拼路线）
 
 ### 第 2 级 · 条件判断 + 传感器（会“思考”的避障车）
 **对应 Python 知识点**：`if / else`、比较运算、`while` 循环、布尔值。
 目标：用 TOF 测距，前面有墙就停，没墙就走——机器人第一次“自己决策”。
-示例文件：`examples/03_避障小车.py`
+动手材料：第 4 周《实践手册》（避障小车）
 
 ### 第 3 级 · 灯光、声音、表情（会“表达”）
 **对应 Python 知识点**：列表、RGB 颜色（三元组）、函数组合。
 目标：碰到障碍闪红灯 + 用语音说“前方有障碍”；平时呼吸绿灯。
-示例文件：`examples/04_灯光与声音.py`
+动手材料：第 5 周《实践手册》（灯光与声音）
 
 ### 第 4 级 · 真 AI：摄像头识别（最惊艳的一级）
 **对应 Python 知识点**：加载模型、读取识别结果、字符串比较、字典/JSON。
 目标：做“手势遥控器”——你比个手势，机器人就执行对应动作。
-示例文件：`examples/05_手势遥控.py`
+动手材料：第 6 周《实践手册》（手势遥控）
 还能扩展：人脸识别（录入家人脸→喊名字）、颜色追踪、交通标志识别、巡线。
 
 ### 第 5 级 · 综合项目（把学到的一起用）
@@ -99,47 +99,60 @@ ug.initialize("192.168.x.x")   # ← 换成机器人屏幕上“设置→关于�
 |---|---|
 | 前进 / 后退 | `ug.mecanum_move_speed(0, 40)`  /  `ug.mecanum_move_speed(1, 40)`（速度 5~80）|
 | 左转 / 右转 | `ug.mecanum_turn_speed(2, 120)`  /  `ug.mecanum_turn_speed(3, 120)`（速度 5~280）|
-| 走 N 秒后停 | `ug.mecanum_move_speed_times(0, 40, 2, 0)`（最后 0=秒，1=厘米）|
+| 走 N 秒/厘米后停 | `ug.mecanum_move_speed_times(0, 40, 2, 0)`（末位单位 move 只有 0=秒 / 1=厘米，写 2 不动）|
+| 转 N 秒/度后停 | `ug.mecanum_turn_speed_times(3, 120, 90, 2)`（末位单位 turn 只有 0=秒 / 2=度）|
 | 停止 | `ug.stop_chassis()`（停止所有形态运动，最常用）|
 
-### 屏幕显示
+> ⚠️ **各形态限速不同**（超范围会被悄悄压到上限、不报错）：麦轮/工程车/变形车 5~80、转弯 5~280；平衡车 5~80、转弯最高 360；轮足 5~60、转弯 5~180；蜘蛛 0~25、转弯 0~60；四足狗 0~25、转弯 0~20。麦轮顺手写的 40 直接抄给蜘蛛/狗就会"不对劲"，换形态要重新试速度。
+
+### 屏幕显示（颜色一律是整数 0-8，不是十六进制字符串！）
 | 功能 | 写法 |
 |---|---|
-| 显示文字 | `ug.screen_print_text("你好", "FFFF0000")`（颜色是 ARGB 十六进制，红/绿/蓝/白见下）|
+| 显示文字 | `ug.screen_print_text("你好", 3)`（3=红；0黑 1白 2紫 3红 4橙 5黄 6绿 7青 8蓝）|
+| 显示并换行 | `ug.screen_print_text_newline("第二行", 6)` |
 | 清屏 | `ug.screen_clear()` |
-| 背景色 | `ug.screen_display_background("FF000000")` |
+| 背景色 | `ug.screen_display_background(0)`（整数 0-8）|
+| 表情 | `ug.screen_display_emotion("Smile")`（15 个表情名，如 WakeUp/Smile/Doubt/Love/Sleep 等）|
 
-### 灯光（灯带编号：0 顶 / 1 左 / 2 右 / 3 底；`-1` 表示不亮）
+> 传 `"FFFF0000"` 这类字符串不会让程序崩，只会打印一行 `TypeError: ... invalid value of color` 然后**什么都不显示**——"机器人没反应"先查参数类型和取值。
+
+### 灯光（灯带编号：0 顶 / 1 左 / 2 右 / 3 底；编号只能 0-3，不想亮的灯别放进列表）
 ```python
 ug.show_light_rgb([0,1,2,3], 255, 0, 0)   # 全部红色
-ug.turn_off_lights()                        # 关灯
+ug.show_light_rgb_effect(255, 0, 0, 3)    # 红灯闪烁（效果：0常亮 / 1关 / 2呼吸 / 3闪烁，一行就够）
+ug.turn_off_lights()                       # 关灯
 ```
 
 ### 声音（语音合成 TTS，0=女声 1=男声）
 ```python
+ug.set_volume(60)                            # 音量 0~100（不是 1~5！写 3 几乎听不见）
 ug.play_audio_tts("前方有障碍，请注意", 0)   # 让机器人开口说话
-ug.set_volume(3)                             # 音量 1~5
 ```
 
 ### 传感器
 | 功能 | 写法 | 返回 |
 |---|---|---|
-| TOF 测距 | `ug.read_distance_data(1)` | 厘米（浮点），-1 表示没读到 |
+| TOF 测距 | `ug.read_distance_data(1)` | 厘米（浮点）；没读到返回 -1（也可能 0），判断写成 `if 距离 != -1 and 距离 < 30:` 防呆 |
 | 陀螺仪 | `ug.read_gyro_data()` | 列表 [俯仰,横滚,偏航,三轴角速度,三轴加速度] |
 | 姿态 | `ug.get_attitude()` | 7 个布尔值（前倾/后倾/左倾/右倾/屏朝上/屏朝下/摇晃）|
 
 ### AI 视觉（先 `ug.load_models([...])` 加载模型，再读结果）
-| 模型名 | 加载 | 读取结果 |
-|---|---|---|
-| 手势 | `ug.load_models(['gesture'])` | `raw = ug.VISION.gesture_inference()` → JSON 里 `gesture` 字段：`stone`/`scissor`/`palm`/`ok`/`good` |
-| 颜色 | `ug.load_models(['color_recognition'])` | `ug.get_color_total_info()` |
-| 人脸 | `ug.load_models(['face_recognition'])` | `ug.get_face_recognition_total_info()` |
-| 交通标志 | `ug.load_models(['traffic_sign'])` | `ug.get_traffic_total_info()` |
-| 人体姿态 | `ug.load_models(['human_pose'])` | `ug.get_pose_total_info()` |
-| 二维码 | `ug.load_models(['apriltag_qrcode'])` | `ug.get_qrcode_total_info()` |
 
-### 颜色十六进制速记（屏幕/灯通用，前面加 `FF`）
-红 `FFFF0000` · 绿 `FF00FF00` · 蓝 `FF0000FF` · 黄 `FFFFFF00` · 白 `FFFFFFFF` · 青 `FF00FFFF` · 紫 `FFFF00FF`
+> **所有 `get_*_total_info()` 返回的都是已解析好的 Python 列表，不要再 `json.loads()`**（再套一层会 TypeError）。
+
+| 模型名 | 加载 | 读取结果（返回值形态） |
+|---|---|---|
+| 手势 | `ug.load_models(['gesture'])` | `ug.get_gesture_result()` → 字符串（随机器人语言变化；要稳定的英文值用 `json.loads(ug.VISION.gesture_inference())["gesture"]`：`stone`/`scissor`/`palm`/`ok`/`good`） |
+| 颜色 | `ug.load_models(['color_recognition'])` | `ug.get_color_total_info()` → `[颜色, 形状, x, y, h, w, area]` |
+| 人脸 | `ug.load_models(['face_recognition'])` | `ug.get_face_recognition_total_info()` → `[[名字, x, y, h, w, area], ...]`；录入家人用 `ug.face_recognition_add_name("名字")` |
+| 交通标志 | `ug.load_models(['traffic_sign'])` | `ug.get_traffic_total_info()` → `[[标志, x, y, h, w, area], ...]` |
+| 人体姿态 | `ug.load_models(['human_pose'])` | `ug.get_pose_total_info()` → 关键点坐标列表 |
+| 二维码/AprilTag | `ug.load_models(['apriltag_qrcode'])` | `ug.get_qrcode_total_info()` / `ug.get_apriltag_total_info()` |
+| 巡线 | `ug.load_models(['line_recognition'])` | 先 `ug.set_track_recognition_line(0)`（0 单轨 / 1 双轨），再 `ug.get_single_track_total_info()` → `[偏移, 类型, x, y]` |
+
+### 颜色速记（两套体系，别混）
+- **屏幕**：整数 0-8 —— 0黑 1白 2紫 3红 4橙 5黄 6绿 7青 8蓝。屏幕颜色**没有**十六进制这种写法，传 `"FF..."` 只会打印 TypeError 且不显示。
+- **灯带**：`show_light_rgb(灯, R, G, B)` 三个 0~255（红 = 255, 0, 0）；`show_light_hsv` 三个都是 0~100（不是 0-360）。
 
 ---
 
